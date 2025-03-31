@@ -99,6 +99,10 @@ IF("${TOOL_CHAIN}" STREQUAL "GCC")
   ELSE()
     MESSAGE(WARNING "UnSupported BuildType: ${CMAKE_BUILD_TYPE}")
   ENDIF()
+  
+  SET(OPENMP_FLAGS "-fopenmp")
+  SET(OPENMP_LIBS  "gomp")
+
 
   # Other flags:
   SET(CXXFLAGS "${CXXFLAGS} -march=native -mtune=native -std=gnu++23 \
@@ -109,7 +113,8 @@ IF("${TOOL_CHAIN}" STREQUAL "GCC")
                 -Wmissing-braces          -Wdisabled-optimization  \
                 -Wconversion              -Wno-stringop-truncation \
                 -Wno-class-memaccess      -Wno-double-promotion    \
-                -Wno-c++20-compat         -no-pie")
+                -Wno-c++20-compat         -no-pie \
+                ${OPENMP_FLAGS}")
 
 #-----------------------------------------------------------------------------#
 ELSEIF("${TOOL_CHAIN}" STREQUAL "CLang")
@@ -124,6 +129,10 @@ ELSEIF("${TOOL_CHAIN}" STREQUAL "CLang")
   ELSE()
     MESSAGE(WARNING "UnSupported BuildType: ${CMAKE_BUILD_TYPE}")
   ENDIF()
+  
+  SET(OPENMP_FLAGS "-fopenmp=libomp")
+  SET(OPENMP_LIBS  "omp")
+
 
   # Other flags (common C++/C, and C++-only):
   SET(CXXFLAGS "${CXXFLAGS}  -march=native -mtune=native                 \
@@ -140,7 +149,7 @@ ELSEIF("${TOOL_CHAIN}" STREQUAL "CLang")
                 -Wno-vla                   -Wno-vla-extension            \
                 -Wno-c99-extensions        -Wno-zero-length-array        \
                 -Wno-packed                -Wno-undefined-func-template  \
-                -Wno-gnu-statement-expression")
+                -Wno-gnu-statement-expression ${OPENMP_FLAGS}")
 
 #-----------------------------------------------------------------------------#
 ELSEIF("${TOOL_CHAIN}" STREQUAL "NVHPC")
@@ -155,10 +164,15 @@ ELSEIF("${TOOL_CHAIN}" STREQUAL "NVHPC")
   ELSE()
     MESSAGE(WARNING "UnSupported BuildType: ${CMAKE_BUILD_TYPE}")
   ENDIF()
+  
+  SET(OPENMP_FLAGS "-fopenmp")
+  SET(OPENMP_LIBS  "omp")
+
 
   SET(CXXFLAGS "${CXXFLAGS} -march=native -mtune=native    \
                 -Wno-switch-enum           -Wno-float-equal \
-                -Wno-missing-prototypes    -Wno-vla         -std=c++23")
+                -Wno-missing-prototypes    -Wno-vla         -std=c++23 \
+                ${OPENMP_FLAGS}")
 
 #-----------------------------------------------------------------------------#
 ELSE()
@@ -183,7 +197,6 @@ ADD_DEFINITIONS(-DBOOST_SYSTEM_NO_DEPRECATED
                 -UBOOST_CB_ENABLE_DEBUG
                 -DBOOST_CB_DISABLE_DEBUG
                 -DUNCHECKED_MODE=${UNCHECKED_MODE}
-                -DWITH_WT=${WITH_WT}
                 -DCRYPTO_ONLY=${CRYPTO_ONLY})
 
 #-----------------------------------------------------------------------------#
@@ -214,7 +227,7 @@ LINK_DIRECTORIES   (${LIB_DIR}
 
 # Generic Settings (for all Strategies):
 #
-ADD_EXECUTABLE(       sosi stc/main.cpp)
+ADD_EXECUTABLE(       sosi src/main.cpp)
 SET_TARGET_PROPERTIES(sosi PROPERTIES OUTPUT_NAME sosi)
 TARGET_LINK_LIBRARIES(sosi ${EXT_LIBS})
 
