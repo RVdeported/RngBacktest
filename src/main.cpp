@@ -100,9 +100,10 @@ struct Strategy {
 			// Move stop loss up to lock in some profit
 			double new_sl = a_px + (uPnl * m_p.m_prftRet / amnt)
 				            * (isLong ? -1.0 : 1.0);
+			double min_sl = a_px * (1.0 + m_p.m_sl * (isLong ? -1.0 : 1.0));
 			m_currOrd.sl_target = isLong 
-				? std::max(m_currOrd.sl_target, new_sl)
-				: std::min(m_currOrd.sl_target, new_sl);
+				? std::min(min_sl, new_sl)
+				: std::max(min_sl, new_sl);
 		}	
 		return;
 	}
